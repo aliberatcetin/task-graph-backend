@@ -1,17 +1,19 @@
 package com.example.xoxbackend.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import org.bson.types.ObjectId;
 
 @Data
 public class Player {
+    private ObjectId id;
+
     private String name;
 
-    @JsonProperty("transfermarkt_id")
-    private String transfermarktId;
+    private String transfermarkt_id;
 
-    @JsonProperty("_id")
-    private String id;
+    private String foot;
+
+    private String image_url;
+
+    private String nationality;
 }

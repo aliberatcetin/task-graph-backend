@@ -1,6 +1,7 @@
 package com.example.xoxbackend.controller;
 
 
+import com.example.xoxbackend.domain.response.CompetitionResponse;
 import com.example.xoxbackend.model.Rank;
 import com.example.xoxbackend.model.TeamMatching;
 import com.example.xoxbackend.service.CompetitionService;
@@ -19,8 +20,8 @@ public class CompetitionController {
 
     private final CompetitionService competitionService;
 
-    @GetMapping(value = "/create-competition")
-    public List<TeamMatching> createCompetition(@RequestParam int boardSize, @RequestParam Rank rank, @RequestParam(required = false) String leagueId) {
-        return competitionService.createCompetition(boardSize, rank, leagueId);
+    @GetMapping(value = "/create-football-competition")
+    public List<CompetitionResponse> createFootballCompetition(@RequestParam int boardSize, @RequestParam Rank rank, @RequestParam(required = false) String leagueId) {
+        return competitionService.createFootballCompetition(boardSize, rank, leagueId);
     }
 }
