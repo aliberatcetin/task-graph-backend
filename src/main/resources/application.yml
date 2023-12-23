@@ -1,5 +1,10 @@
 ---
 spring:
+  neo4j:
+    uri: bolt://localhost:7689
+    authentication:
+      username: neo4j
+      password: asdzxc1122..
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -19,12 +24,11 @@ swagger:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: '@version@'
 
-mongodb:
-  connection-string: 'mongodb://178.62.241.217:27017/test'
-  database: 'football'
-  collection:
-    player: 'player'
-    team: 'team'
-    league: 'league'
-    player-team: 'player_team'
-    team-matching: 'team_matching'
+
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          neo4j=DEBUG:
+
