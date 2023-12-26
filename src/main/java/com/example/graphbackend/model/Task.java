@@ -1,17 +1,18 @@
-package com.example.xoxbackend.model;
+package com.example.graphbackend.model;
 
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
-import org.springframework.data.neo4j.core.schema.Property;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static org.springframework.data.neo4j.core.schema.Relationship.Direction.INCOMING;
+import static org.springframework.data.neo4j.core.schema.Relationship.Direction.OUTGOING;
 
 @Node("Task")
 @Data
@@ -29,6 +30,6 @@ public class Task {
     private final float x;
     private final float y;
     @Relationship(type = "DEPENDENT_TO", direction = INCOMING)
-    private Set<Task> dependencies = new HashSet<>();
-
+    private Set<Task> dependencies = new LinkedHashSet<>();
+    private Set<String> targets = new HashSet<>();
 }

@@ -1,8 +1,7 @@
-package com.example.xoxbackend.domain.response;
+package com.example.graphbackend.domain.response;
 
-import com.example.xoxbackend.model.Task;
+import com.example.graphbackend.model.Task;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;

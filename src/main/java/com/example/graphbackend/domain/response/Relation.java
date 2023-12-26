@@ -1,4 +1,4 @@
-package com.example.xoxbackend.domain.response;
+package com.example.graphbackend.domain.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

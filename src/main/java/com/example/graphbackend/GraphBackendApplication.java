@@ -1,13 +1,13 @@
-package com.example.xoxbackend;
+package com.example.graphbackend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class XoxBackendApplication {
+public class GraphBackendApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(XoxBackendApplication.class, args);
+        SpringApplication.run(GraphBackendApplication.class, args);
     }
 
 }
