@@ -27,8 +27,8 @@ public class GraphController {
     }
 
     @GetMapping("/{id1}/{id2}")
-    public boolean isTherePath(@PathVariable String id1, @PathVariable String id2 ){
-        return graphService.isTherePath(id1,id2);
+    public boolean isTherePath(@PathVariable String id1, @PathVariable String id2) {
+        return graphService.isTherePath(id1, id2);
     }
 
     @GetMapping("/{id}")
@@ -38,13 +38,13 @@ public class GraphController {
 
     @PutMapping
     Task updateTask(@RequestBody Task task) {
-        Task t =  graphService.update(task);
+        Task t = graphService.update(task);
         return t;
     }
 
     @PostMapping
     Task createTask(@RequestBody Task task) {
-        Task t =  graphService.save(task);
+        Task t = graphService.save(task);
         return t;
     }
 
@@ -54,10 +54,9 @@ public class GraphController {
     }
 
     @DeleteMapping("/{id1}/{id2}")
-    void detach(@PathVariable String id1, @PathVariable String id2){
-        taskRepository.deleteContact(id1,id2);
+    void detach(@PathVariable String id1, @PathVariable String id2) {
+        taskRepository.deleteContact(id1, id2);
     }
-
 
 
 }
