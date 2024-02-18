@@ -12,7 +12,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static org.springframework.data.neo4j.core.schema.Relationship.Direction.INCOMING;
-import static org.springframework.data.neo4j.core.schema.Relationship.Direction.OUTGOING;
 
 @Node("Task")
 @Data
@@ -20,13 +19,16 @@ import static org.springframework.data.neo4j.core.schema.Relationship.Direction.
 public class Task {
 
     @Id
-    private final String id;
-    private final String title;
-    private final String task;
-    private final String type;
-    private final String inputSource;
-    private final String output;
-    private final String input;
+    private String id;
+    private String title;
+    private String task;
+    private String type;
+    private String inputSource;
+    private String output;
+    DATA_TYPE dataType = DATA_TYPE.INTEGER;
+    private String input;
+    private String runLog;
+    TASK_STATE taskState = TASK_STATE.READY;
     private final float x;
     private final float y;
     @Relationship(type = "DEPENDENT_TO", direction = INCOMING)

@@ -2,12 +2,14 @@ package com.example.graphbackend.controller;
 
 
 import com.example.graphbackend.domain.response.GraphResponse;
+import com.example.graphbackend.model.TASK_STATE;
 import com.example.graphbackend.model.Task;
 import com.example.graphbackend.repository.ITaskRepository;
 import com.example.graphbackend.service.GraphService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,6 +50,21 @@ public class GraphController {
         return t;
     }
 
+    @GetMapping("/run/bulk")
+    List<Task> topologicalSort() {
+        return graphService.topologicalSort();
+    }
+
+    @PostMapping("/run")
+    void runTask(@RequestBody Task task) {
+        graphService.runTask(task);
+    }
+
+    @GetMapping("/run/{id}/{state}")
+    void updateTaskState(@PathVariable String id, @PathVariable TASK_STATE state) {
+        graphService.updateTaskState(id, state);
+    }
+
     @DeleteMapping("{id}")
     void deleteTask(@PathVariable String id) {
         taskRepository.deleteById(id);
@@ -57,6 +74,5 @@ public class GraphController {
     void detach(@PathVariable String id1, @PathVariable String id2) {
         taskRepository.deleteContact(id1, id2);
     }
-
 
 }

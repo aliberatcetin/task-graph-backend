@@ -1,13 +1,15 @@
 ---
 spring:
   neo4j:
-    uri: bolt://localhost:7689
+    uri: bolt://localhost:7687
     authentication:
       username: neo4j
       password: asdzxc1122..
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+server:
+  port: 8081
 
   application:
     name: 'Orchestration Api'
@@ -15,7 +17,7 @@ spring:
 
 swagger:
   host:
-    url: localhost:8080
+    url: localhost:8081
     protocol: http
   contact:
     name: GraphBackend
@@ -32,3 +34,14 @@ logging:
         data:
           neo4j=DEBUG:
 
+
+
+feign:
+  httpclient:
+    connection-timeout: 15000
+  client:
+    config:
+      mpi-api:
+        url: http://localhost:8080
+  hystrix:
+    enabled: false
