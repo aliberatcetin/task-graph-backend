@@ -14,4 +14,7 @@ public interface ITaskRepository extends Neo4jRepository<Task, String> {
 
     @Query("MATCH path = (startNode:Task)-[:DEPENDENT_TO*]->(endNode:Task) WHERE startNode.id = $id1 AND endNode.id = $id2 RETURN path is not NULL")
     public Boolean isTherePath(@Param("id1") String id1, @Param("id2") String id2);
+
+    @Query("MATCH (s:Task) WHERE NOT (s)<-[:DEPENDENT_TO]-(:Task) RETURN s")
+    List<Task> findTasksWithNoDependencies();
 }

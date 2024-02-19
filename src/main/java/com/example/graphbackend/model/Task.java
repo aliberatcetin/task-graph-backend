@@ -33,5 +33,9 @@ public class Task {
     private final float y;
     @Relationship(type = "DEPENDENT_TO", direction = INCOMING)
     private Set<Task> dependencies = new LinkedHashSet<>();
-    private Set<String> targets = new HashSet<>();
+    private Set<String> targets;
+
+    public void addTarget(String id){
+        targets.add(id);
+    }
 }

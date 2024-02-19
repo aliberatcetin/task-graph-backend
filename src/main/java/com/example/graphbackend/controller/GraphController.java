@@ -9,7 +9,6 @@ import com.example.graphbackend.service.GraphService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,8 +50,8 @@ public class GraphController {
     }
 
     @GetMapping("/run/bulk")
-    List<Task> topologicalSort() {
-        return graphService.topologicalSort();
+    void topologicalSort() {
+        graphService.bulkRun();
     }
 
     @PostMapping("/run")
