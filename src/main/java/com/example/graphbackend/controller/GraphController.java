@@ -9,6 +9,7 @@ import com.example.graphbackend.service.GraphService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,6 +36,15 @@ public class GraphController {
     @GetMapping("/{id}")
     public Optional<Task> getTaskById(@PathVariable String id) {
         return taskRepository.findById(id);
+    }
+    @GetMapping("/executionDetail/{id}")
+    public Optional<Task> getTaskByIdForExecution(@PathVariable String id) {
+        Optional<Task> task = taskRepository.findById(id);
+        if(task.isEmpty()){
+            return null;
+        }
+        task.get().setDependencies(new LinkedHashSet<>());
+        return task;
     }
 
     @PutMapping

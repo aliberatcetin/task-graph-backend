@@ -1,5 +1,6 @@
 package com.example.graphbackend.repository;
 
+import com.example.graphbackend.model.TASK_STATE;
 import com.example.graphbackend.model.Task;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
@@ -17,4 +18,7 @@ public interface ITaskRepository extends Neo4jRepository<Task, String> {
 
     @Query("MATCH (s:Task) WHERE NOT (s)<-[:DEPENDENT_TO]-(:Task) RETURN s")
     List<Task> findTasksWithNoDependencies();
+
+    @Query("MATCH (a:Task {id:$id}) SET a.taskState = $taskState")
+    void updateTaskState(@Param("id") String id, @Param("taskState") TASK_STATE taskState);
 }

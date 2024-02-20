@@ -95,21 +95,31 @@ public class GraphService {
         }
         /*task.setTaskState(TASK_STATE.RUNNING);
         update(task);*/
+        task.setDependencies(new LinkedHashSet());
         TaskExecution taskExecution = new TaskExecution(EXECUTION_TYPE.SINGLE, task.getId());
+
         mpiClient.runTask(taskExecution);
     }
 
+    public boolean isReadyToRun(String id){
+        Task t = taskRepository.findById(id).get();
+        return t.getDependencies().stream().allMatch(task -> TASK_STATE.TERMINATED.equals(task.getTaskState()));
+    }
     public void updateTaskState(String id, TASK_STATE state) {
+        taskRepository.updateTaskState(id, state);
+
         Optional<Task> task = taskRepository.findById(id);
         if (task.isPresent()) {
             Task task_ = task.get();
-            task_.setTaskState(state);
-            taskRepository.save(task_);
 
             if (task_.getTaskState() == TASK_STATE.TERMINATED) {
                 Set<String> targets = task_.getTargets();
                 targets.forEach(target -> {
-                    runTask(taskRepository.findById(target).get());
+                    if(isReadyToRun(target)){
+                        Task toRun = taskRepository.findById(target).get();
+                        toRun.setDependencies(new LinkedHashSet());
+                        runTask(toRun);
+                    }
                 });
             }
 
