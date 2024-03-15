@@ -69,6 +69,11 @@ public class GraphController {
         graphService.runTask(task);
     }
 
+    @GetMapping("/clearall")
+    void runTask() {
+        taskRepository.clearAll();
+    }
+
     @GetMapping("/run/{id}/{state}")
     void updateTaskState(@PathVariable String id, @PathVariable TASK_STATE state) {
         graphService.updateTaskState(id, state);
@@ -81,7 +86,12 @@ public class GraphController {
 
     @DeleteMapping("/{id1}/{id2}")
     void detach(@PathVariable String id1, @PathVariable String id2) {
-        taskRepository.deleteContact(id1, id2);
+       graphService.deletePath(id1, id2);
+    }
+
+    @GetMapping("/{id}/dependants")
+    List<Task> getDependants(@PathVariable String id){
+        return taskRepository.findNodesDependentOnTask(id);
     }
 
 }

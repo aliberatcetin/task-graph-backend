@@ -29,7 +29,7 @@ public class GraphService {
         List<Relation> relations = new ArrayList<>();
         tasks.forEach(task -> {
             task.getDependencies().forEach(dependency -> {
-                relations.add(new Relation(dependency.getId(), task.getId(), "empty"));
+                relations.add(new Relation(task.getId(),dependency.getId(), "empty","DEPENDENT_TO"));
             });
         });
 
@@ -60,7 +60,7 @@ public class GraphService {
             task.setInput(task.getDependencies().stream().findFirst().get().getId()+".txt");
         }
         Task task1 = taskRepository.save(task);
-        buildRelationIfNeeds(oldTask.get(), task);
+        //buildRelationIfNeeds(oldTask.get(), task);
         return task1;
     }
 
@@ -88,47 +88,36 @@ public class GraphService {
     }
 
     public void runTask(Task task) {
-        List<String> ids = task.getDependencies().stream().map(Task::getId).collect(Collectors.toList());
-        List<Task> dependencies = taskRepository.findAllById(ids);
-        if (dependencies.stream().anyMatch(task_ -> task_.getTaskState() != TASK_STATE.TERMINATED)) {
+        if ( taskRepository.isRunning(task.getId()) || (task.getDependencies().size() > 0 && !taskRepository.isReadyToRun(task.getId()))) {
             return;
         }
-        /*task.setTaskState(TASK_STATE.RUNNING);
-        update(task);*/
         task.setDependencies(new LinkedHashSet());
         TaskExecution taskExecution = new TaskExecution(EXECUTION_TYPE.SINGLE, task.getId());
-
         mpiClient.runTask(taskExecution);
     }
 
-    public boolean isReadyToRun(String id){
-        Task t = taskRepository.findById(id).get();
+    public boolean isReadyToRun(Task t){
         return t.getDependencies().stream().allMatch(task -> TASK_STATE.TERMINATED.equals(task.getTaskState()));
     }
     public void updateTaskState(String id, TASK_STATE state) {
         taskRepository.updateTaskState(id, state);
-
-        Optional<Task> task = taskRepository.findById(id);
-        if (task.isPresent()) {
-            Task task_ = task.get();
-
-            if (task_.getTaskState() == TASK_STATE.TERMINATED) {
-                Set<String> targets = task_.getTargets();
-                targets.forEach(target -> {
-                    if(isReadyToRun(target)){
-                        Task toRun = taskRepository.findById(target).get();
-                        toRun.setDependencies(new LinkedHashSet());
-                        runTask(toRun);
-                    }
-                });
-            }
-
+        if(state == TASK_STATE.TERMINATED){
+            List<Task> targetTasks = taskRepository.findNodesDependentOnTask(id);
+            targetTasks.forEach(task ->{
+                if(taskRepository.isReadyToRun(task.getId())){
+                    task.setDependencies(new LinkedHashSet());
+                    runTask(task);
+                }
+            });
         }
-
-
     }
 
     public void bulkRun() {
+        List<Task> tasks = taskRepository.findAll();
+        tasks.forEach(task->{
+            task.setTaskState(TASK_STATE.READY);
+        });
+        taskRepository.saveAll(tasks);
         List<Task> initial = initial();
         initial.forEach(this::runTask);
     }
@@ -290,6 +279,11 @@ public class GraphService {
         }
 
         return result;
+    }
+
+    public void deletePath(String id1, String id2){
+        taskRepository.deleteContact(id1, id2);
+        //taskRepository.removeTarget(id2, id1);
     }
 
 }
