@@ -6,6 +6,7 @@ import com.example.graphbackend.model.TASK_STATE;
 import com.example.graphbackend.model.Task;
 import com.example.graphbackend.repository.ITaskRepository;
 import com.example.graphbackend.service.GraphService;
+import com.example.graphbackend.service.KeyValueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,7 @@ import java.util.Optional;
 public class GraphController {
 
     private final GraphService graphService;
+    private final KeyValueService keyValueService;
     private final ITaskRepository taskRepository;
 
     @GetMapping
@@ -37,10 +39,11 @@ public class GraphController {
     public Optional<Task> getTaskById(@PathVariable String id) {
         return taskRepository.findById(id);
     }
+
     @GetMapping("/executionDetail/{id}")
     public Optional<Task> getTaskByIdForExecution(@PathVariable String id) {
         Optional<Task> task = taskRepository.findById(id);
-        if(task.isEmpty()){
+        if (task.isEmpty()) {
             return null;
         }
         task.get().setDependencies(new LinkedHashSet<>());
@@ -81,17 +84,18 @@ public class GraphController {
 
     @DeleteMapping("{id}")
     void deleteTask(@PathVariable String id) {
-        taskRepository.deleteById(id);
+        graphService.deleteById(id);
     }
 
     @DeleteMapping("/{id1}/{id2}")
     void detach(@PathVariable String id1, @PathVariable String id2) {
-       graphService.deletePath(id1, id2);
+        graphService.deletePath(id1, id2);
     }
 
     @GetMapping("/{id}/dependants")
-    List<Task> getDependants(@PathVariable String id){
+    List<Task> getDependants(@PathVariable String id) {
         return taskRepository.findNodesDependentOnTask(id);
     }
+
 
 }

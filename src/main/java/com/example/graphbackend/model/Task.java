@@ -35,6 +35,7 @@ public class Task {
     @Relationship(type = "DEPENDANT_TO", direction = OUTGOING)
     private Set<Task> dependencies = new LinkedHashSet<>();
     private Set<String> targets;
+    private Set<String> dependenciesString = new LinkedHashSet<>();
 
     public void addTarget(String id){
         targets.add(id);

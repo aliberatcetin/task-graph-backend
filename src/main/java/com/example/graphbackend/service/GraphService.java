@@ -8,6 +8,7 @@ import com.example.graphbackend.model.TASK_STATE;
 import com.example.graphbackend.model.Task;
 import com.example.graphbackend.model.TaskExecution;
 import com.example.graphbackend.repository.ITaskRepository;
+import com.example.graphbackend.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.SetUtils;
@@ -29,7 +30,7 @@ public class GraphService {
         List<Relation> relations = new ArrayList<>();
         tasks.forEach(task -> {
             task.getDependencies().forEach(dependency -> {
-                relations.add(new Relation(task.getId(),dependency.getId(), "empty","DEPENDENT_TO"));
+                relations.add(new Relation(task.getId(), dependency.getId(), "empty", "DEPENDENT_TO"));
             });
         });
 
@@ -57,10 +58,16 @@ public class GraphService {
     public Task update(Task task) {
         Optional<Task> oldTask = taskRepository.findById(task.getId());
         if (task.getDependencies().size() != 0) {
-            task.setInput(task.getDependencies().stream().findFirst().get().getId()+".txt");
+            task.setInput(task.getDependencies().stream().findFirst().get().getId() + ".txt");
         }
+
+        task.setDependenciesString(new LinkedHashSet<>());
+        task.getDependencies().forEach(dep->{
+            task.getDependenciesString().add(dep.getId());
+        });
         Task task1 = taskRepository.save(task);
-        //buildRelationIfNeeds(oldTask.get(), task);
+        buildRelationIfNeeds(oldTask.get(), task);
+        //addDependantToDependency(task);
         return task1;
     }
 
@@ -84,11 +91,22 @@ public class GraphService {
             SetUtils.SetView<Task> difference = SetUtils.difference(taskToCreateOrUpdate.getDependencies(), oldTask.getDependencies());
             addOutgoingEdge(difference.stream().findFirst().get().getId(), taskToCreateOrUpdate);
         }
+    }
 
+    public void addDependantToDependency(Task task) {
+        Optional<Task> dependencyTask = taskRepository.findById(task.getDependencies().stream().findFirst().get().getId());
+        if (dependencyTask.isEmpty()) {
+            return;
+        }
+
+        Optional<Task> oldTask = taskRepository.findById(task.getId());
+
+        dependencyTask.get().getTargets().add(task.getId());
+        taskRepository.save(dependencyTask.get());
     }
 
     public void runTask(Task task) {
-        if ( taskRepository.isRunning(task.getId()) || (task.getDependencies().size() > 0 && !taskRepository.isReadyToRun(task.getId()))) {
+        if (taskRepository.isRunning(task.getId()) || (task.getDependencies().size() > 0 && !taskRepository.isReadyToRun(task.getId()))) {
             return;
         }
         task.setDependencies(new LinkedHashSet());
@@ -96,15 +114,16 @@ public class GraphService {
         mpiClient.runTask(taskExecution);
     }
 
-    public boolean isReadyToRun(Task t){
+    public boolean isReadyToRun(Task t) {
         return t.getDependencies().stream().allMatch(task -> TASK_STATE.TERMINATED.equals(task.getTaskState()));
     }
+
     public void updateTaskState(String id, TASK_STATE state) {
         taskRepository.updateTaskState(id, state);
-        if(state == TASK_STATE.TERMINATED){
+        if (state == TASK_STATE.TERMINATED) {
             List<Task> targetTasks = taskRepository.findNodesDependentOnTask(id);
-            targetTasks.forEach(task ->{
-                if(taskRepository.isReadyToRun(task.getId())){
+            targetTasks.forEach(task -> {
+                if (taskRepository.isReadyToRun(task.getId())) {
                     task.setDependencies(new LinkedHashSet());
                     runTask(task);
                 }
@@ -114,7 +133,7 @@ public class GraphService {
 
     public void bulkRun() {
         List<Task> tasks = taskRepository.findAll();
-        tasks.forEach(task->{
+        tasks.forEach(task -> {
             task.setTaskState(TASK_STATE.READY);
         });
         taskRepository.saveAll(tasks);
@@ -281,9 +300,26 @@ public class GraphService {
         return result;
     }
 
-    public void deletePath(String id1, String id2){
+    public void deletePath(String id1, String id2) {
+        Task dependencyTask = taskRepository.findById(id1).get();
+        dependencyTask.getTargets().remove(id2);
         taskRepository.deleteContact(id1, id2);
+        Task dependantTask = taskRepository.findById(id2).get();
+        dependantTask.getDependenciesString().remove(id1);
+        taskRepository.save(dependantTask);
+        taskRepository.save(dependencyTask);
+
         //taskRepository.removeTarget(id2, id1);
+    }
+
+    public void deleteById(String id){
+        Task task = taskRepository.findById(id).get();
+        task.getDependencies().forEach(task_->{
+            Task dependencyTask = taskRepository.findById(task_.getId()).get();
+            dependencyTask.getTargets().remove(id);
+            taskRepository.save(dependencyTask);
+        });
+        taskRepository.deleteById(id);
     }
 
 }
